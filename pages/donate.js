@@ -33,11 +33,17 @@ export default function DonatePage() {
     // Handle message: take everything after `message=` in the URL
     // This allows HTML or & characters safely
     let message;
-    const messageIndex = rawUrl.indexOf("message=");
-    if (messageIndex >= 0) {
-      message = decodeURIComponent(rawUrl.substring(messageIndex + 8));
-      if (message === "") message = undefined;
-    }
+const messageIndex = rawUrl.indexOf("message=");
+if (messageIndex >= 0) {
+  // grab everything after message=
+  message = decodeURIComponent(rawUrl.substring(messageIndex + 8));
+  if (message) {
+    // remove HTML tags
+    message = message.replace(/<[^>]*>/g, '').trim();
+  } else {
+    message = undefined;
+  }
+}
 
     const options = {
       link: params.get("link") || DONORFUSE_LINK,
