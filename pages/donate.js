@@ -1,22 +1,15 @@
-// File: pages/donate.js
-// Next.js (pages router) page that auto-opens the DonorFuse donation popup
-// Simplified version: only includes donation ID in message
-
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 const DONORFUSE_LINK = "CMYAliyos";
 const DEFAULT_CAMPAIGN_ID = 10531;
 
 export default function DonatePage() {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
   useEffect(() => {
     const rawUrl = window.location.href;
     const url = new URL(rawUrl);
     const params = url.searchParams;
 
-    // Amount cleanup: remove $ and commas
+    // Amount cleanup
     const amountRaw = params.get("amount");
     let amount;
     if (amountRaw) {
@@ -34,9 +27,9 @@ export default function DonatePage() {
       lastName = parts.length ? parts.join(" ") : undefined;
     }
 
-    // Only include donation ID as message
-    const donationIdRaw = params.get("message") || undefined; // repurposed message param for donation ID
-    const donationId = donationIdRaw ? donationIdRaw.trim() : undefined;
+    // Only include donation ID as message with prefix
+    const donationIdRaw = params.get("message") || undefined;
+    const donationId = donationIdRaw ? `Donation ID: ${donationIdRaw.trim()}` : undefined;
 
     const options = {
       link: params.get("link") || DONORFUSE_LINK,
@@ -47,20 +40,8 @@ export default function DonatePage() {
       lastName: lastName,
       email: params.get("email") || undefined,
       phone: params.get("phone") || undefined,
-      message: donationId, // only donation ID
+      message: donationId,
     };
-
-    const hasQueryParams = [...params.keys()].length > 0;
-    if (!hasQueryParams) {
-      setLoading(false);
-      return;
-    }
-
-    if (!options.link || !options.campaign) {
-      setError("Missing required configuration (link or campaign).");
-      setLoading(false);
-      return;
-    }
 
     function tryShow() {
       try {
@@ -68,17 +49,12 @@ export default function DonatePage() {
           for (const k of Object.keys(options)) {
             if (options[k] === undefined || options[k] === null || options[k] === "") delete options[k];
           }
-          window.DonorFuseClient.ShowPopup(options, function (result) {
-            console.log("DonorFuse callback:", result);
-          });
-          setLoading(false);
+          window.DonorFuseClient.ShowPopup(options);
           return true;
         }
         return false;
       } catch (e) {
         console.error("Error calling DonorFuseClient:", e);
-        setError("Error initializing donation popup.");
-        setLoading(false);
         return false;
       }
     }
@@ -87,43 +63,21 @@ export default function DonatePage() {
 
     const scriptSrc = "https://donate.donorfuse.com/assets/embed.js";
     const existing = document.querySelector(`script[src="${scriptSrc}"]`);
-    if (existing) {
+    if (!existing) {
+      const s = document.createElement("script");
+      s.src = scriptSrc;
+      s.async = true;
+      s.onload = () => {
+        const poll = setInterval(() => { if (tryShow()) clearInterval(poll); }, 150);
+        setTimeout(() => { clearInterval(poll); }, 8000);
+      };
+      s.onerror = () => console.error("Failed to load DonorFuse embed script.");
+      document.body.appendChild(s);
+    } else {
       const poll = setInterval(() => { if (tryShow()) clearInterval(poll); }, 200);
-      setTimeout(() => { clearInterval(poll); if (loading) setLoading(false); }, 10000);
-      return;
     }
-
-    const s = document.createElement("script");
-    s.src = scriptSrc;
-    s.async = true;
-    s.onload = () => {
-      const poll = setInterval(() => { if (tryShow()) clearInterval(poll); }, 150);
-      setTimeout(() => { clearInterval(poll); if (loading) setLoading(false); }, 8000);
-    };
-    s.onerror = () => { setError("Failed to load DonorFuse embed script."); setLoading(false); };
-    document.body.appendChild(s);
-
   }, []);
 
-  return (
-    <div style={{ fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial', padding: 24 }}>
-      <h1 style={{ fontSize: 20, marginBottom: 8 }}>Donation relay — DonorFuse popup</h1>
-
-      {loading && <div><p>Opening donation popup…</p></div>}
-
-      {error && <div style={{ color: 'crimson', marginTop: 12 }}><strong>Error:</strong> {error}</div>}
-
-      {!loading && !error && <div style={{ marginTop: 12 }}><p>Popup should be open.</p></div>}
-
-      <hr style={{ marginTop: 18 }} />
-
-      <div style={{ fontSize: 12, color: '#666', marginTop: 8 }}>
-        <p>Defaults:</p>
-        <ul>
-          <li>DonorFuse link: <code>{DONORFUSE_LINK}</code></li>
-          <li>Default campaign ID: <code>{DEFAULT_CAMPAIGN_ID}</code></li>
-        </ul>
-      </div>
-    </div>
-  );
+  // Empty fragment: no visible page content, only popup
+  return <></>;
 }
