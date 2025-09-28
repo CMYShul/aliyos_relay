@@ -1,3 +1,7 @@
+// File: pages/donate.js
+// Next.js (pages router) page that auto-opens the DonorFuse donation popup
+// Simplified version: only includes donation ID in message
+
 import { useEffect, useState } from "react";
 
 const DONORFUSE_LINK = "CMYAliyos";
@@ -30,20 +34,9 @@ export default function DonatePage() {
       lastName = parts.length ? parts.join(" ") : undefined;
     }
 
-    // Handle message: take everything after `message=` in the URL
-    // This allows HTML or & characters safely
-    let message;
-const messageIndex = rawUrl.indexOf("message=");
-if (messageIndex >= 0) {
-  // grab everything after message=
-  message = decodeURIComponent(rawUrl.substring(messageIndex + 8));
-  if (message) {
-    // remove HTML tags
-    message = message.replace(/<[^>]*>/g, '').trim();
-  } else {
-    message = undefined;
-  }
-}
+    // Only include donation ID as message
+    const donationIdRaw = params.get("message") || undefined; // repurposed message param for donation ID
+    const donationId = donationIdRaw ? donationIdRaw.trim() : undefined;
 
     const options = {
       link: params.get("link") || DONORFUSE_LINK,
@@ -54,7 +47,7 @@ if (messageIndex >= 0) {
       lastName: lastName,
       email: params.get("email") || undefined,
       phone: params.get("phone") || undefined,
-      message: message,
+      message: donationId, // only donation ID
     };
 
     const hasQueryParams = [...params.keys()].length > 0;
@@ -116,11 +109,11 @@ if (messageIndex >= 0) {
     <div style={{ fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial', padding: 24 }}>
       <h1 style={{ fontSize: 20, marginBottom: 8 }}>Donation relay — DonorFuse popup</h1>
 
-      {loading && <div><p>Opening donation popup…</p><p style={{ fontSize: 12, color: '#666' }}>If the popup doesn't appear automatically, make sure popups are allowed for this site and that your URL includes query parameters like <code>?amount=18.00&name=John%20Doe&email=john@example.com&phone=1234567890&message=Thanks</code>.</p></div>}
+      {loading && <div><p>Opening donation popup…</p></div>}
 
       {error && <div style={{ color: 'crimson', marginTop: 12 }}><strong>Error:</strong> {error}</div>}
 
-      {!loading && !error && <div style={{ marginTop: 12 }}><p>Popup should be open (or no query params were supplied).</p></div>}
+      {!loading && !error && <div style={{ marginTop: 12 }}><p>Popup should be open.</p></div>}
 
       <hr style={{ marginTop: 18 }} />
 
