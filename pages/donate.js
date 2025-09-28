@@ -12,7 +12,11 @@ export default function DonatePage() {
 
     // Read supported params (human-readable)
     const amountRaw = params.get("amount");
-    const amount = amountRaw ? Number(amountRaw) : undefined;
+   let amount;
+if (amountRaw) {
+  const cleanAmount = amountRaw.replace(/[^0-9.]/g, ""); // removes $ and commas
+  amount = Number(cleanAmount);
+}
 
     // Use `name` as the single full-name query param per your preference
     const nameParam = params.get("name") || "";
