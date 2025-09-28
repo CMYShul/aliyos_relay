@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
 // Configuration: Update only if you want different defaults
-const DONORFUSE_LINK = 'https://donate.donorfuse.com/CMYAliyos';
+const DONORFUSE_LINK = 'CMYAliyos';
 const DEFAULT_CAMPAIGN_ID = 10531;
 
 export default function DonatePage() {
