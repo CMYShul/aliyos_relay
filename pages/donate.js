@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 
-const DONORFUSE_LINK = "CMYAliyos";
-const DEFAULT_CAMPAIGN_ID = 10531;
+const DONORFUSE_LINK = "CMYPAliyos";
+const DEFAULT_CAMPAIGN_ID = 10596;
 
 export default function DonatePage() {
   useEffect(() => {
