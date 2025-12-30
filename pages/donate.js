@@ -9,7 +9,6 @@ export default function DonatePage() {
     const url = new URL(rawUrl);
     const params = url.searchParams;
 
-    // Amount cleanup
     const amountRaw = params.get("amount");
     let amount;
     if (amountRaw) {
@@ -17,7 +16,6 @@ export default function DonatePage() {
       amount = Number(cleanAmount);
     }
 
-    // Full name parsing
     const nameParam = params.get("name") || "";
     const fullName = nameParam.trim() || undefined;
     let firstName, lastName;
@@ -27,7 +25,6 @@ export default function DonatePage() {
       lastName = parts.length ? parts.join(" ") : undefined;
     }
 
-    // Only include donation ID as message with prefix
     const donationIdRaw = params.get("message") || undefined;
     const donationId = donationIdRaw ? `Donation ID: ${donationIdRaw.trim()}` : undefined;
 
@@ -78,6 +75,5 @@ export default function DonatePage() {
     }
   }, []);
 
-  // Empty fragment: no visible page content, only popup
   return <></>;
 }
