@@ -9,12 +9,15 @@ export default function DonatePage() {
     const url = new URL(rawUrl);
     const params = url.searchParams;
 
-    const amountRaw = params.get("amount");
-    let amount;
-    if (amountRaw) {
-      const cleanAmount = amountRaw.replace(/[^0-9.]/g, "");
-      amount = Number(cleanAmount);
+  const amountRaw = params.get("amount");
+  let amount;
+  if (amountRaw) {
+  const cleanAmount = amountRaw.toString().replace(/[^0-9.]/g, "");
+  const parsed = Number(cleanAmount);
+  if (!isNaN(parsed) && parsed > 0) {
+    amount = parsed;
     }
+  }
 
     const nameParam = params.get("name") || "";
     const fullName = nameParam.trim() || undefined;
@@ -23,6 +26,13 @@ export default function DonatePage() {
       const parts = fullName.split(/\s+/);
       firstName = parts.shift();
       lastName = parts.length ? parts.join(" ") : undefined;
+    }
+
+    const phoneRaw = params.get("phone");
+    let phone;
+    if (phoneRaw) {
+    const digits = phoneRaw.replace(/\D/g, "");
+    phone = digits.length > 10 ? digits.slice(-10) : digits;
     }
 
     const donationIdRaw = params.get("message") || undefined;
@@ -36,7 +46,7 @@ export default function DonatePage() {
       firstName: firstName,
       lastName: lastName,
       email: params.get("email") || undefined,
-      phone: params.get("phone") || undefined,
+      phone: phone,
       message: donationId,
     };
 
